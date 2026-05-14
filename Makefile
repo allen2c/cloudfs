@@ -3,7 +3,7 @@
 install:
 	poetry install -E all
 
-upgrade:
+update:
 	poetry update
 	poetry export \
 		--format requirements.txt \
@@ -16,6 +16,6 @@ upgrade:
 		--with dev \
 		--all-extras
 
-format_all:
+format:
 	isort cloudfs tests
 	black cloudfs tests
