@@ -1,6 +1,7 @@
 .env
 .envrc
 poetry.lock
+secrets
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
