@@ -1,9 +1,4 @@
-"""CloudFS entry point."""
-
 from .backend.gcs import GCSPath
-from .version import VERSION
-
-__version__ = VERSION
 
 
 def from_uri(uri: str):

@@ -13,10 +13,6 @@ class GCSPath:
         self._key = key.strip("/") if key else ""
         self.__client = _client
 
-    # ------------------------------------------------------------------ #
-    # Internal helpers
-    # ------------------------------------------------------------------ #
-
     @property
     def _client(self):
         if self.__client is None:
@@ -36,10 +32,6 @@ class GCSPath:
     def _child(self, key: str) -> "GCSPath":
         return GCSPath(self._bucket_name, key, _client=self.__client)
 
-    # ------------------------------------------------------------------ #
-    # String / repr
-    # ------------------------------------------------------------------ #
-
     def __str__(self) -> str:
         if self._key:
             return f"gs://{self._bucket_name}/{self._key}"
@@ -55,10 +47,6 @@ class GCSPath:
 
     def __hash__(self) -> int:
         return hash((self._bucket_name, self._key))
-
-    # ------------------------------------------------------------------ #
-    # pathlib.Path-compatible properties
-    # ------------------------------------------------------------------ #
 
     @property
     def name(self) -> str:
@@ -102,10 +90,6 @@ class GCSPath:
             return (root,)
         return (root,) + tuple(self._key.split("/"))
 
-    # ------------------------------------------------------------------ #
-    # Path joining
-    # ------------------------------------------------------------------ #
-
     def __truediv__(self, other: str) -> "GCSPath":
         other = str(other).strip("/")
         new_key = f"{self._key}/{other}" if self._key else other
@@ -117,16 +101,11 @@ class GCSPath:
             result = result / part
         return result
 
-    # ------------------------------------------------------------------ #
-    # Existence / type checks
-    # ------------------------------------------------------------------ #
-
     def exists(self) -> bool:
         if not self._key:
             return self._bucket.exists()
         if self._blob.exists():
             return True
-        # treat as directory if any objects share the prefix
         prefix = self._key.rstrip("/") + "/"
         blobs = self._client.list_blobs(self._bucket_name, prefix=prefix, max_results=1)
         return any(True for _ in blobs)
@@ -142,10 +121,6 @@ class GCSPath:
         prefix = self._key.rstrip("/") + "/"
         blobs = self._client.list_blobs(self._bucket_name, prefix=prefix, max_results=1)
         return any(True for _ in blobs)
-
-    # ------------------------------------------------------------------ #
-    # Directory listing
-    # ------------------------------------------------------------------ #
 
     def iterdir(self) -> Iterator["GCSPath"]:
         prefix = (self._key.rstrip("/") + "/") if self._key else ""
@@ -181,10 +156,6 @@ class GCSPath:
             if fnmatch.fnmatch(rel, "**/" + pattern) or fnmatch.fnmatch(rel, pattern):
                 yield self._child(blob.name)
 
-    # ------------------------------------------------------------------ #
-    # Read / write
-    # ------------------------------------------------------------------ #
-
     def read_bytes(self) -> bytes:
         return self._blob.download_as_bytes()
 
@@ -199,10 +170,6 @@ class GCSPath:
         encoded = data.encode(encoding)
         self._blob.upload_from_string(encoded, content_type="text/plain")
         return len(encoded)
-
-    # ------------------------------------------------------------------ #
-    # Delete / rename
-    # ------------------------------------------------------------------ #
 
     def unlink(self, missing_ok: bool = False) -> None:
         if not self._blob.exists():
@@ -221,13 +188,7 @@ class GCSPath:
     def replace(self, target: "GCSPath | str") -> "GCSPath":
         return self.rename(target)
 
-    # ------------------------------------------------------------------ #
-    # Mkdir (GCS has no real dirs — create a placeholder object)
-    # ------------------------------------------------------------------ #
-
-    def mkdir(
-        self, parents: bool = False, exist_ok: bool = False
-    ) -> None:  # noqa: ARG002
+    def mkdir(self, parents: bool = False, exist_ok: bool = False) -> None:
         if self.exists():
             if exist_ok:
                 return
@@ -235,18 +196,10 @@ class GCSPath:
         placeholder = self._key.rstrip("/") + "/"
         self._bucket.blob(placeholder).upload_from_string(b"")
 
-    # ------------------------------------------------------------------ #
-    # stat-like info
-    # ------------------------------------------------------------------ #
-
     def stat(self) -> "GCSStatResult":
         blob = self._blob
         blob.reload()
         return GCSStatResult(blob)
-
-    # ------------------------------------------------------------------ #
-    # Class methods
-    # ------------------------------------------------------------------ #
 
     @classmethod
     def from_uri(cls, uri: str, _client=None) -> "GCSPath":

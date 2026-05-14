@@ -1,5 +1,9 @@
 # AGENTS.md
 
+## Style
+
+- No bar/section-divider comments (e.g. `# --- #`, `# ===`). Let structure speak for itself.
+
 ## Code Organization
 
 ### File Structure Order
