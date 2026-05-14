@@ -1,11 +1,21 @@
-install_all:
+.PHONY: install upgrade format_all
+
+install:
 	poetry install -E all
 
-upgrade_dependencies:
+upgrade:
 	poetry update
-	poetry export --without-hashes -f requirements.txt --output requirements.txt
-	poetry export --without-hashes -f requirements.txt --with dev --extras all --output requirements_all.txt
+	poetry export \
+		--format requirements.txt \
+		--output requirements.txt \
+		--without-hashes
+	poetry export \
+		--format requirements.txt \
+		--output requirements_all.txt \
+		--without-hashes \
+		--with dev \
+		--all-extras
 
 format_all:
-	isort . --skip setup.py
-	black --exclude setup.py .
+	isort cloudfs tests
+	black cloudfs tests
