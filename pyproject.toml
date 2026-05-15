@@ -18,9 +18,18 @@ dev = [
     "flake8",
     "black",
     "isort",
+    "flake8-pyproject",
     "poetry-plugin-export",
     "python-dotenv",
 ]
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
