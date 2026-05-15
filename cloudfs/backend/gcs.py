@@ -1,4 +1,36 @@
-"""Google Cloud Storage backend for CloudFS."""
+"""Google Cloud Storage backend for CloudFS.
+
+GCS-specific behavior and known differences from local filesystems:
+
+Directories:
+    GCS has no real directories — only blob names containing slashes. Directories
+    are simulated either by placeholder blobs (a zero-byte object named "prefix/")
+    created by mkdir(), or implicitly by blobs that share a common prefix.
+
+    - mkdir() creates a placeholder blob. If all files under a directory are
+      unlinked but the placeholder remains, is_dir() still returns True.
+    - Writing directly to a sub-path (write_text, write_bytes) never requires
+      a prior mkdir(), unlike local filesystems.
+    - A path can simultaneously satisfy is_file() and is_dir() if a blob named
+      "foo" and another named "foo/bar" both exist. This cannot happen locally.
+
+rmdir():
+    Only removes the placeholder blob created by mkdir(). A "virtual" directory
+    that was never explicitly created (one that exists only because blobs share
+    its prefix) will raise FileNotFoundError even if is_dir() returns True.
+
+iterdir():
+    Uses GCS delimiter-based listing to emulate one-level listing. Empty virtual
+    directories (no placeholder, no children) are invisible to iterdir().
+
+Consistency:
+    GCS provides strong read-after-write consistency for all operations since
+    November 2020. No eventual-consistency caveats apply.
+
+Performance:
+    Each exists(), is_file(), and is_dir() call makes at least one API request.
+    Avoid calling them in tight loops; prefer bulk listing via iterdir() or walk().
+"""
 
 from __future__ import annotations
 
@@ -215,12 +247,12 @@ class GCSPath(CloudPath):
 
         try:
             for blob in self._client.list_blobs(self._bucket_name, prefix=prefix):
-                rel = blob.name[len(prefix):]
+                rel = blob.name[len(prefix) :]
                 if not rel:
                     continue
                 parts = rel.split("/")
                 dir_key = self._key
-                for i, part in enumerate(parts[:-1]):
+                for part in parts[:-1]:
                     parent_key = dir_key
                     dir_key = f"{dir_key}/{part}" if dir_key else part
                     if part not in tree[parent_key][0]:
@@ -232,7 +264,9 @@ class GCSPath(CloudPath):
                 on_error(e)
             return
 
-        def _yield(key: str) -> Generator[tuple["GCSPath", list[str], list[str]], None, None]:
+        def _yield(
+            key: str,
+        ) -> Generator[tuple["GCSPath", list[str], list[str]], None, None]:
             dirnames, filenames = tree[key]
             dirpath = self._child(key)
             if top_down:
@@ -265,7 +299,9 @@ class GCSPath(CloudPath):
         errors: str | None = None,
         newline: str | None = None,
     ) -> IO:
-        return self._blob.open(mode=mode, encoding=encoding, errors=errors, newline=newline)
+        return self._blob.open(
+            mode=mode, encoding=encoding, errors=errors, newline=newline
+        )
 
     def read_bytes(self) -> bytes:
         return self._blob.download_as_bytes()

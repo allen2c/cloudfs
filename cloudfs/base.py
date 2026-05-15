@@ -217,13 +217,19 @@ class CloudPath(ABC):
         raise CloudOperationError("Cloud storage does not support sockets.")
 
     def lstat(self) -> Any:
-        raise CloudOperationError("lstat() is not supported: cloud storage has no symlinks.")
+        raise CloudOperationError(
+            "lstat() is not supported: cloud storage has no symlinks."
+        )
 
     def chmod(self, mode: int, follow_symlinks: bool = True) -> None:
-        raise CloudOperationError("chmod() is not supported: cloud storage has no POSIX permissions.")
+        raise CloudOperationError(
+            "chmod() is not supported: cloud storage has no POSIX permissions."
+        )
 
     def lchmod(self, mode: int) -> None:
-        raise CloudOperationError("lchmod() is not supported: cloud storage has no POSIX permissions.")
+        raise CloudOperationError(
+            "lchmod() is not supported: cloud storage has no POSIX permissions."
+        )
 
     def symlink_to(self, target: Any, target_is_directory: bool = False) -> None:
         raise CloudOperationError("Cloud storage does not support symlinks.")
@@ -232,12 +238,18 @@ class CloudPath(ABC):
         raise CloudOperationError("Cloud storage does not support hard links.")
 
     def expanduser(self) -> "CloudPath":
-        raise CloudOperationError("expanduser() is not supported: cloud paths have no home directory.")
+        raise CloudOperationError(
+            "expanduser() is not supported: cloud paths have no home directory."
+        )
 
     @classmethod
     def home(cls) -> "CloudPath":
-        raise CloudOperationError("home() is not supported: cloud paths have no home directory.")
+        raise CloudOperationError(
+            "home() is not supported: cloud paths have no home directory."
+        )
 
     @classmethod
     def cwd(cls) -> "CloudPath":
-        raise CloudOperationError("cwd() is not supported: cloud paths have no working directory.")
+        raise CloudOperationError(
+            "cwd() is not supported: cloud paths have no working directory."
+        )
