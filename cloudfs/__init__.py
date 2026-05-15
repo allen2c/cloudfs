@@ -1,4 +1,5 @@
-from .base import from_uri
+from .base import CloudPath as Path
+from .exceptions import CloudOperationError
 from .version import VERSION as __version__
 
-__all__ = ["__version__", "from_uri"]
+__all__ = ["__version__", "Path", "CloudOperationError"]
