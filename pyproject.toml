@@ -24,6 +24,7 @@ dev = [
     "flake8",
     "black",
     "isort",
+    "pytest-xdist",
     "flake8-pyproject",
     "poetry-plugin-export",
     "python-dotenv",
