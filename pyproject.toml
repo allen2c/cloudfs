@@ -20,13 +20,14 @@ all = [
 
 [dependency-groups]
 dev = [
-    "pytest",
-    "flake8",
     "black",
-    "isort",
-    "pytest-xdist",
+    "flake8",
     "flake8-pyproject",
+    "isort",
+    "mkdocs-material",
     "poetry-plugin-export",
+    "pytest",
+    "pytest-xdist",
     "python-dotenv",
 ]
 
