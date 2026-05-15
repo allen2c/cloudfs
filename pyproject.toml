@@ -11,7 +11,12 @@ dependencies = []
 [project.optional-dependencies]
 google = ["google-cloud-storage>=3,<4"]
 s3 = ["boto3>=1.35,<2"]
-all = ["google-cloud-storage>=3,<4", "boto3>=1.35,<2"]
+azure = ["azure-storage-blob>=12,<13"]
+all = [
+    "google-cloud-storage>=3,<4",
+    "boto3>=1.35,<2",
+    "azure-storage-blob>=12,<13",
+]
 
 [dependency-groups]
 dev = [

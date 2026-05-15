@@ -27,6 +27,10 @@ class CloudPath(ABC):
                 from .backend.s3 import S3Path
 
                 return S3Path.from_uri(uri)
+            if uri.startswith("az://"):
+                from .backend.azure import AzurePath
+
+                return AzurePath.from_uri(uri)
             raise ValueError(f"Unsupported URI scheme: {uri!r}")
         return object.__new__(cls)
 
