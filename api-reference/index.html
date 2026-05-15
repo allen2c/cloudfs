@@ -1,0 +1,1913 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Cloud storage that works like your local filesystem.">
+      
+      
+      
+        <link rel="canonical" href="https://allen2c.github.io/cloudfs/api-reference/">
+      
+      
+        <link rel="prev" href="../backends/azure/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>API Reference - CloudFS</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#api-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="CloudFS" class="md-header__button md-logo" aria-label="CloudFS" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            CloudFS
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              API Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/allen2c/cloudfs" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cloudfs
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="CloudFS" class="md-nav__button md-logo" aria-label="CloudFS" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    CloudFS
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/allen2c/cloudfs" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cloudfs
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backends
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backends
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../backends/gcs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Google Cloud Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../backends/s3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AWS S3
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../backends/azure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Azure Blob Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pathuri" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path(uri)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Properties
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#name-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        name → str
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stem-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stem → str
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#suffix-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        suffix → str
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#suffixes-liststr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        suffixes → list[str]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parent-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parent → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parents-listpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parents → list[Path]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parts-tuplestr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parts → tuple[str, ...]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#drive-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        drive → str
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#root-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        root → str
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anchor-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        anchor → str
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#path-manipulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path Manipulation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Path Manipulation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#path-other-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        path / other → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joinpathothers-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        joinpath(*others) → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with_namename-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        with_name(name) → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with_stemstem-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        with_stem(stem) → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with_suffixsuffix-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        with_suffix(suffix) → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is_absolute-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        is_absolute() → bool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resolvestrictfalse-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        resolve(strict=False) → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#absolute-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        absolute() → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#existence-type-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Existence &amp; Type Checks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Existence &amp; Type Checks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exists-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        exists() → bool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is_file-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        is_file() → bool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is_dir-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        is_dir() → bool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#samefileother-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        samefile(other) → bool
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#directory-listing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Directory Listing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Directory Listing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#iterdir-iteratorpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iterdir() → Iterator[Path]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#globpattern-iteratorpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        glob(pattern) → Iterator[Path]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rglobpattern-iteratorpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rglob(pattern) → Iterator[Path]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#walktop_downtrue-on_errornone-generator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        walk(top_down=True, on_error=None) → Generator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reading-writing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading &amp; Writing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reading &amp; Writing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#openmoder-encodingnone-errorsnone-newlinenone-io" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        open(mode='r', encoding=None, errors=None, newline=None) → IO
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read_bytes-bytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_bytes() → bytes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read_textencodingutf-8-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_text(encoding='utf-8') → str
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write_bytesdata-bytes-int" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        write_bytes(data: bytes) → int
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write_textdata-str-encodingutf-8-int" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        write_text(data: str, encoding='utf-8') → int
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Operations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="File Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#touchmode0o666-exist_oktrue-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        touch(mode=0o666, exist_ok=True) → None
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unlinkmissing_okfalse-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        unlink(missing_ok=False) → None
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#renametarget-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rename(target) → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#replacetarget-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        replace(target) → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdirparentsfalse-exist_okfalse-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdir(parents=False, exist_ok=False) → None
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rmdir-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rmdir() → None
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#statfollow_symlinkstrue-statresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stat(follow_symlinks=True) → StatResult
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exceptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exceptions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Exceptions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cloudoperationerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CloudOperationError
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pathuri" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path(uri)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Properties
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#name-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        name → str
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stem-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stem → str
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#suffix-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        suffix → str
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#suffixes-liststr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        suffixes → list[str]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parent-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parent → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parents-listpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parents → list[Path]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parts-tuplestr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parts → tuple[str, ...]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#drive-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        drive → str
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#root-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        root → str
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anchor-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        anchor → str
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#path-manipulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path Manipulation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Path Manipulation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#path-other-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        path / other → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joinpathothers-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        joinpath(*others) → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with_namename-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        with_name(name) → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with_stemstem-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        with_stem(stem) → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with_suffixsuffix-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        with_suffix(suffix) → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is_absolute-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        is_absolute() → bool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resolvestrictfalse-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        resolve(strict=False) → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#absolute-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        absolute() → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#existence-type-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Existence &amp; Type Checks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Existence &amp; Type Checks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exists-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        exists() → bool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is_file-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        is_file() → bool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is_dir-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        is_dir() → bool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#samefileother-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        samefile(other) → bool
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#directory-listing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Directory Listing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Directory Listing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#iterdir-iteratorpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iterdir() → Iterator[Path]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#globpattern-iteratorpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        glob(pattern) → Iterator[Path]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rglobpattern-iteratorpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rglob(pattern) → Iterator[Path]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#walktop_downtrue-on_errornone-generator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        walk(top_down=True, on_error=None) → Generator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reading-writing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading &amp; Writing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reading &amp; Writing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#openmoder-encodingnone-errorsnone-newlinenone-io" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        open(mode='r', encoding=None, errors=None, newline=None) → IO
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read_bytes-bytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_bytes() → bytes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read_textencodingutf-8-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_text(encoding='utf-8') → str
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write_bytesdata-bytes-int" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        write_bytes(data: bytes) → int
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write_textdata-str-encodingutf-8-int" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        write_text(data: str, encoding='utf-8') → int
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Operations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="File Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#touchmode0o666-exist_oktrue-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        touch(mode=0o666, exist_ok=True) → None
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unlinkmissing_okfalse-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        unlink(missing_ok=False) → None
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#renametarget-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rename(target) → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#replacetarget-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        replace(target) → Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdirparentsfalse-exist_okfalse-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdir(parents=False, exist_ok=False) → None
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rmdir-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rmdir() → None
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#statfollow_symlinkstrue-statresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stat(follow_symlinks=True) → StatResult
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exceptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exceptions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Exceptions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cloudoperationerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CloudOperationError
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="api-reference">API Reference</h1>
+<h2 id="pathuri"><code>Path(uri)</code></h2>
+<p>Entry point. Returns a backend-specific path object based on the URI scheme.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">cloudfs</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://bucket/key&quot;</span><span class="p">)</span>    <span class="c1"># → GCSPath</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;s3://bucket/key&quot;</span><span class="p">)</span>    <span class="c1"># → S3Path</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;az://container/key&quot;</span><span class="p">)</span> <span class="c1"># → AzurePath</span>
+</code></pre></div>
+<p><code>isinstance(p, Path)</code> returns <code>True</code> for all backends.</p>
+<p>Raises <code>ValueError</code> for unsupported URI schemes.</p>
+<hr />
+<h2 id="properties">Properties</h2>
+<h3 id="name-str"><code>name → str</code></h3>
+<p>The final component of the path.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://bucket/a/b/report.csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># &quot;report.csv&quot;</span>
+</code></pre></div>
+<h3 id="stem-str"><code>stem → str</code></h3>
+<p>The final component without its suffix.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://bucket/a/report.csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span>  <span class="c1"># &quot;report&quot;</span>
+</code></pre></div>
+<h3 id="suffix-str"><code>suffix → str</code></h3>
+<p>The file extension of the final component.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://bucket/a/report.csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span>  <span class="c1"># &quot;.csv&quot;</span>
+</code></pre></div>
+<h3 id="suffixes-liststr"><code>suffixes → list[str]</code></h3>
+<p>All extensions of the final component.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://bucket/a/archive.tar.gz&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">suffixes</span>  <span class="c1"># [&quot;.tar&quot;, &quot;.gz&quot;]</span>
+</code></pre></div>
+<h3 id="parent-path"><code>parent → Path</code></h3>
+<p>The logical parent of the path.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://bucket/a/b/c.txt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>  <span class="c1"># gs://bucket/a/b</span>
+</code></pre></div>
+<h3 id="parents-listpath"><code>parents → list[Path]</code></h3>
+<p>All logical ancestors.</p>
+<h3 id="parts-tuplestr"><code>parts → tuple[str, ...]</code></h3>
+<p>The path split into components. The first element includes the URI scheme and bucket/container.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://bucket/a/b.txt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">parts</span>  <span class="c1"># (&quot;gs://bucket/&quot;, &quot;a&quot;, &quot;b.txt&quot;)</span>
+</code></pre></div>
+<h3 id="drive-str"><code>drive → str</code></h3>
+<p>The URI scheme and bucket/container name.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://bucket/key&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">drive</span>  <span class="c1"># &quot;gs://bucket&quot;</span>
+</code></pre></div>
+<h3 id="root-str"><code>root → str</code></h3>
+<p>Always <code>"/"</code>.</p>
+<h3 id="anchor-str"><code>anchor → str</code></h3>
+<p><code>drive + root</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://bucket/key&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">anchor</span>  <span class="c1"># &quot;gs://bucket/&quot;</span>
+</code></pre></div>
+<hr />
+<h2 id="path-manipulation">Path Manipulation</h2>
+<h3 id="path-other-path"><code>path / other → Path</code></h3>
+<p>Join paths using the <code>/</code> operator.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://bucket/data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;2024&quot;</span> <span class="o">/</span> <span class="s2">&quot;report.csv&quot;</span>
+</code></pre></div>
+<h3 id="joinpathothers-path"><code>joinpath(*others) → Path</code></h3>
+<p>Equivalent to chaining <code>/</code>.</p>
+<h3 id="with_namename-path"><code>with_name(name) → Path</code></h3>
+<p>Return a new path with the filename changed.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://bucket/a/old.txt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="s2">&quot;new.txt&quot;</span><span class="p">)</span>  <span class="c1"># gs://bucket/a/new.txt</span>
+</code></pre></div>
+<h3 id="with_stemstem-path"><code>with_stem(stem) → Path</code></h3>
+<p>Return a new path with the stem changed, preserving the suffix.</p>
+<h3 id="with_suffixsuffix-path"><code>with_suffix(suffix) → Path</code></h3>
+<p>Return a new path with the suffix changed.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://bucket/a/report.txt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.csv&quot;</span><span class="p">)</span>  <span class="c1"># gs://bucket/a/report.csv</span>
+</code></pre></div>
+<h3 id="is_absolute-bool"><code>is_absolute() → bool</code></h3>
+<p>Always <code>True</code> — cloud paths are always absolute.</p>
+<h3 id="resolvestrictfalse-path"><code>resolve(strict=False) → Path</code></h3>
+<p>Returns a new path object equal to <code>self</code> (cloud paths are already absolute).</p>
+<h3 id="absolute-path"><code>absolute() → Path</code></h3>
+<p>Same as <code>resolve()</code>.</p>
+<hr />
+<h2 id="existence-type-checks">Existence &amp; Type Checks</h2>
+<h3 id="exists-bool"><code>exists() → bool</code></h3>
+<p><code>True</code> if the path refers to an existing file or directory.</p>
+<h3 id="is_file-bool"><code>is_file() → bool</code></h3>
+<p><code>True</code> if the path is an existing file (blob/object).</p>
+<h3 id="is_dir-bool"><code>is_dir() → bool</code></h3>
+<p><code>True</code> if the path is a directory (has children or a placeholder blob).</p>
+<h3 id="samefileother-bool"><code>samefile(other) → bool</code></h3>
+<p><code>True</code> if both paths point to the same object in the same bucket/container.</p>
+<hr />
+<h2 id="directory-listing">Directory Listing</h2>
+<h3 id="iterdir-iteratorpath"><code>iterdir() → Iterator[Path]</code></h3>
+<p>Yield the direct children of a directory (one level only).</p>
+<h3 id="globpattern-iteratorpath"><code>glob(pattern) → Iterator[Path]</code></h3>
+<p>Yield all matching paths using shell-style pattern matching.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://bucket/data/&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.csv&quot;</span><span class="p">):</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="rglobpattern-iteratorpath"><code>rglob(pattern) → Iterator[Path]</code></h3>
+<p>Like <code>glob()</code> but recursive.</p>
+<h3 id="walktop_downtrue-on_errornone-generator"><code>walk(top_down=True, on_error=None) → Generator</code></h3>
+<p>Yield <code>(dirpath, dirnames, filenames)</code> tuples, similar to <code>os.walk()</code>.</p>
+<hr />
+<h2 id="reading-writing">Reading &amp; Writing</h2>
+<h3 id="openmoder-encodingnone-errorsnone-newlinenone-io"><code>open(mode='r', encoding=None, errors=None, newline=None) → IO</code></h3>
+<p>Open the file. Supports modes <code>'r'</code>, <code>'rb'</code>, <code>'w'</code>, <code>'wb'</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">with</span> <span class="n">p</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</code></pre></div>
+<h3 id="read_bytes-bytes"><code>read_bytes() → bytes</code></h3>
+<p>Return the full contents as bytes.</p>
+<h3 id="read_textencodingutf-8-str"><code>read_text(encoding='utf-8') → str</code></h3>
+<p>Return the full contents as a string.</p>
+<h3 id="write_bytesdata-bytes-int"><code>write_bytes(data: bytes) → int</code></h3>
+<p>Write bytes and return the number of bytes written.</p>
+<h3 id="write_textdata-str-encodingutf-8-int"><code>write_text(data: str, encoding='utf-8') → int</code></h3>
+<p>Write text and return the number of bytes written.</p>
+<hr />
+<h2 id="file-operations">File Operations</h2>
+<h3 id="touchmode0o666-exist_oktrue-none"><code>touch(mode=0o666, exist_ok=True) → None</code></h3>
+<p>Create the file if it does not exist. If <code>exist_ok=False</code>, raises <code>FileExistsError</code> when the file already exists.</p>
+<h3 id="unlinkmissing_okfalse-none"><code>unlink(missing_ok=False) → None</code></h3>
+<p>Delete the file. Raises <code>FileNotFoundError</code> if the file does not exist and <code>missing_ok=False</code>.</p>
+<h3 id="renametarget-path"><code>rename(target) → Path</code></h3>
+<p>Move the file to <code>target</code> and return the new path.</p>
+<h3 id="replacetarget-path"><code>replace(target) → Path</code></h3>
+<p>Alias for <code>rename()</code>.</p>
+<h3 id="mkdirparentsfalse-exist_okfalse-none"><code>mkdir(parents=False, exist_ok=False) → None</code></h3>
+<p>Create a directory placeholder. Raises <code>FileExistsError</code> if it already exists and <code>exist_ok=False</code>.</p>
+<h3 id="rmdir-none"><code>rmdir() → None</code></h3>
+<p>Delete a directory placeholder created by <code>mkdir()</code>. Raises <code>FileNotFoundError</code> if the placeholder does not exist, and <code>OSError</code> if the directory is not empty.</p>
+<h3 id="statfollow_symlinkstrue-statresult"><code>stat(follow_symlinks=True) → StatResult</code></h3>
+<p>Return an object with:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>st_size</code></td>
+<td><code>int</code></td>
+<td>Size in bytes</td>
+</tr>
+<tr>
+<td><code>st_mtime</code></td>
+<td><code>float</code></td>
+<td>Last modified (Unix timestamp)</td>
+</tr>
+<tr>
+<td><code>st_ctime</code></td>
+<td><code>float</code></td>
+<td>Created time (Unix timestamp); falls back to <code>st_mtime</code> on backends that don't track creation time</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="exceptions">Exceptions</h2>
+<h3 id="cloudoperationerror"><code>CloudOperationError</code></h3>
+<p>Raised when a <code>pathlib.Path</code> operation has no meaningful cloud equivalent.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">cloudfs</span><span class="w"> </span><span class="kn">import</span> <span class="n">CloudOperationError</span>
+</code></pre></div>
+<p>Operations that always raise <code>CloudOperationError</code>:</p>
+<ul>
+<li><code>is_symlink()</code>, <code>symlink_to()</code>, <code>hardlink_to()</code></li>
+<li><code>is_mount()</code>, <code>is_junction()</code></li>
+<li><code>is_block_device()</code>, <code>is_char_device()</code>, <code>is_fifo()</code>, <code>is_socket()</code></li>
+<li><code>lstat()</code>, <code>chmod()</code>, <code>lchmod()</code></li>
+<li><code>relative_to()</code>, <code>is_relative_to()</code></li>
+<li><code>expanduser()</code>, <code>home()</code>, <code>cwd()</code></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.sections", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
