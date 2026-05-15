@@ -1,0 +1,43 @@
+site_name: CloudFS
+site_description: Cloud storage that works like your local filesystem.
+site_url: https://allen2c.github.io/cloudfs/
+repo_url: https://github.com/allen2c/cloudfs
+repo_name: cloudfs
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.sections
+    - content.code.copy
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+
+exclude_docs: |
+  superpowers/**
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Backends:
+    - Google Cloud Storage: backends/gcs.md
+    - AWS S3: backends/s3.md
+    - Azure Blob Storage: backends/azure.md
+  - API Reference: api-reference.md

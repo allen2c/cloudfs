@@ -1,230 +1,263 @@
-import io
-from pathlib import Path as _Path
-from typing import Dict, Generator, Text, Type, Union
+"""CloudPath abstract base — the public Path interface."""
 
-from yarl import URL
+from __future__ import annotations
 
-support_schemes = ("file", "gs", "s3", "azure")
+from abc import ABC, abstractmethod
+from typing import IO, Any, Generator, Iterator
+
+from .exceptions import CloudOperationError
 
 
-class Path:
-    def __new__(cls: Type["Path"], *args, **kwargs) -> "Path":
-        path = args[0] if args else kwargs.get("path")
-        if not path:
-            raise ValueError("Paramter 'path' is required")
-        if cls == Path:
-            if str(path).startswith("file://"):
-                return object.__new__(LocalPath)
-            elif str(path).startswith("gs://"):
-                from cloudfs.gs import GSPath
+class CloudPath(ABC):
+    """Abstract base for all cloud paths. Dispatches to backend on construction.
 
-                return object.__new__(GSPath)
-            elif str(path).startswith("s3://"):
-                from cloudfs.s3 import S3Path
+    Usage:
+        from cloudfs import Path
+        p = Path("gs://bucket/key")
+    """
 
-                return object.__new__(S3Path)
-            elif str(path).startswith("azure://"):
-                from cloudfs.azure import AzurePath
+    def __new__(cls, *args, **kwargs) -> "CloudPath":
+        if cls is CloudPath:
+            uri = args[0] if args else ""
+            if uri.startswith("gs://"):
+                from .backend.gcs import GCSPath
 
-                return object.__new__(AzurePath)
+                return GCSPath.from_uri(uri)
+            if uri.startswith("s3://"):
+                from .backend.s3 import S3Path
+
+                return S3Path.from_uri(uri)
+            if uri.startswith("az://"):
+                from .backend.azure import AzurePath
+
+                return AzurePath.from_uri(uri)
+            raise ValueError(f"Unsupported URI scheme: {uri!r}")
         return object.__new__(cls)
 
-    def __init__(self, path: Union[Text, "URL"], **kwargs):
-        self._url = URL(path)
+    @abstractmethod
+    def __str__(self) -> str: ...
 
-        if self._url.scheme not in support_schemes:
-            raise ValueError(
-                f"Unsupported scheme: {support_schemes}, got {self._url.scheme}"
-            )
+    @abstractmethod
+    def __repr__(self) -> str: ...
 
-    def __str__(self):
-        return str(self._url)
+    @abstractmethod
+    def __eq__(self, other: object) -> bool: ...
 
-    def __repr__(self):
-        return self.__str__()
+    @abstractmethod
+    def __hash__(self) -> int: ...
 
-    def __eq__(self, other_path: "Path") -> bool:
-        raise NotImplementedError
+    @abstractmethod
+    def __truediv__(self, other: str) -> "CloudPath": ...
 
-    def __truediv__(self, name: Text) -> "Path":
-        raise NotImplementedError
+    @abstractmethod
+    def __lt__(self, other: "CloudPath") -> bool: ...
 
-    def ping(self) -> bool:
-        raise NotImplementedError
+    @abstractmethod
+    def __le__(self, other: "CloudPath") -> bool: ...
 
-    def samefile(self, other_path) -> bool:
-        raise NotImplementedError
+    @abstractmethod
+    def __gt__(self, other: "CloudPath") -> bool: ...
 
-    def glob(
-        self,
-        pattern: Text,
-        *,
-        return_file: bool = True,
-        return_dir: bool = True,
-        **kwargs,
-    ) -> Generator["Path", None, None]:
-        raise NotImplementedError
-
-    def stat(self) -> Dict[Text, Union[int, float]]:
-        raise NotImplementedError
-
-    def owner(self) -> Text:
-        raise NotImplementedError
-
-    def group(self) -> Text:
-        raise NotImplementedError
-
-    def open(self, **kwargs) -> io.IOBase:
-        raise NotImplementedError
-
-    def read_bytes(self) -> bytes:
-        raise NotImplementedError
-
-    def read_text(self, encoding=None, errors=None) -> Text:
-        raise NotImplementedError
-
-    def write_bytes(self, data) -> int:
-        raise NotImplementedError
-
-    def write_text(self, data, encoding=None, errors=None) -> int:
-        raise NotImplementedError
-
-    def touch(self, mode=438, exist_ok=True) -> None:
-        raise NotImplementedError
-
-    def mkdir(self, mode=511, parents=False, exist_ok=False) -> None:
-        raise NotImplementedError
-
-    def unlink(self, missing_ok=False) -> None:
-        raise NotImplementedError
-
-    def rmdir(self) -> None:
-        raise NotImplementedError
-
-    def rename(self, target) -> "Path":
-        raise NotImplementedError
-
-    def replace(self, target) -> "Path":
-        raise NotImplementedError
-
-    def exists(self) -> bool:
-        raise NotImplementedError
-
-    def is_dir(self) -> bool:
-        raise NotImplementedError
-
-    def is_file(self) -> bool:
-        raise NotImplementedError
-
-
-class LocalPath(Path):
-    def __init__(self, path: Union[Text, URL], **kwargs):
-        super().__init__(path, **kwargs)
-
-    def __eq__(self, other_path: "LocalPath") -> bool:
-        if not isinstance(other_path, LocalPath):
-            return False
-        return self._url == other_path._url
-
-    def __truediv__(self, name: Text) -> "LocalPath":
-        if not isinstance(name, Text):
-            raise ValueError(f"Expected str, got {type(name)}")
-        return LocalPath(self._url / name)
+    @abstractmethod
+    def __ge__(self, other: "CloudPath") -> bool: ...
 
     @property
-    def _path(self) -> _Path:
-        return _Path((self._url.host or "") + (self._url.path or ""))
+    @abstractmethod
+    def drive(self) -> str: ...
 
-    def ping(self) -> bool:
-        return True
+    @property
+    @abstractmethod
+    def root(self) -> str: ...
 
-    def samefile(self, other_path: "LocalPath") -> bool:
-        if not isinstance(other_path, LocalPath):
-            return False
-        other_ = _Path((other_path._url.host or "") + (other_path._url.path or ""))
-        return self._path.samefile(other_)
+    @property
+    @abstractmethod
+    def anchor(self) -> str: ...
 
-    def glob(
+    @property
+    @abstractmethod
+    def name(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def stem(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def suffix(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def suffixes(self) -> list[str]: ...
+
+    @property
+    @abstractmethod
+    def parent(self) -> "CloudPath": ...
+
+    @property
+    @abstractmethod
+    def parents(self) -> list["CloudPath"]: ...
+
+    @property
+    @abstractmethod
+    def parts(self) -> tuple[str, ...]: ...
+
+    @abstractmethod
+    def joinpath(self, *others: str) -> "CloudPath": ...
+
+    @abstractmethod
+    def with_name(self, name: str) -> "CloudPath": ...
+
+    @abstractmethod
+    def with_stem(self, stem: str) -> "CloudPath": ...
+
+    @abstractmethod
+    def with_suffix(self, suffix: str) -> "CloudPath": ...
+
+    @abstractmethod
+    def is_absolute(self) -> bool: ...
+
+    @abstractmethod
+    def resolve(self, strict: bool = False) -> "CloudPath": ...
+
+    @abstractmethod
+    def absolute(self) -> "CloudPath": ...
+
+    @abstractmethod
+    def exists(self) -> bool: ...
+
+    @abstractmethod
+    def is_file(self) -> bool: ...
+
+    @abstractmethod
+    def is_dir(self) -> bool: ...
+
+    @abstractmethod
+    def samefile(self, other: "CloudPath") -> bool: ...
+
+    @abstractmethod
+    def iterdir(self) -> Iterator["CloudPath"]: ...
+
+    @abstractmethod
+    def walk(
         self,
-        pattern: Text,
-        *,
-        return_file: bool = True,
-        return_dir: bool = True,
-        **kwargs,
-    ) -> Generator["LocalPath", None, None]:
-        for i in self._path.glob(pattern):
-            if not return_file and i.is_file():
-                continue
-            if not return_dir and i.is_dir():
-                continue
-            yield LocalPath(i.as_uri())
+        top_down: bool = True,
+        on_error: Any = None,
+    ) -> Generator[tuple["CloudPath", list[str], list[str]], None, None]: ...
 
-    def stat(self) -> Dict[Text, Union[int, float]]:
-        stat_info = self._path.stat()
-        stat_dict = {
-            "st_mode": stat_info.st_mode,
-            "st_ino": stat_info.st_ino,
-            "st_dev": stat_info.st_dev,
-            "st_nlink": stat_info.st_nlink,
-            "st_uid": stat_info.st_uid,
-            "st_gid": stat_info.st_gid,
-            "st_size": stat_info.st_size,
-            "st_atime": stat_info.st_atime,
-            "st_mtime": stat_info.st_mtime,
-            "st_ctime": stat_info.st_ctime,
-        }
-        return stat_dict
+    @abstractmethod
+    def glob(self, pattern: str) -> Iterator["CloudPath"]: ...
 
-    def owner(self) -> Text:
-        return self._path.owner()
+    @abstractmethod
+    def rglob(self, pattern: str) -> Iterator["CloudPath"]: ...
 
-    def group(self) -> Text:
-        return self._path.group()
+    @abstractmethod
+    def open(
+        self,
+        mode: str = "r",
+        buffering: int = -1,
+        encoding: str | None = None,
+        errors: str | None = None,
+        newline: str | None = None,
+    ) -> IO: ...
 
-    def open(self, **kwargs) -> io.IOBase:
-        return self._path.open(**kwargs)
+    @abstractmethod
+    def read_bytes(self) -> bytes: ...
 
-    def read_bytes(self) -> bytes:
-        return self._path.read_bytes()
+    @abstractmethod
+    def read_text(self, encoding: str = "utf-8") -> str: ...
 
-    def read_text(self, encoding=None, errors=None) -> Text:
-        return self._path.read_text(encoding=encoding, errors=errors)
+    @abstractmethod
+    def write_bytes(self, data: bytes) -> int: ...
 
-    def write_bytes(self, data: bytes) -> int:
-        return self._path.write_bytes(data)
+    @abstractmethod
+    def write_text(self, data: str, encoding: str = "utf-8") -> int: ...
 
-    def write_text(self, data, encoding=None, errors=None) -> int:
-        return self._path.write_text(data, encoding=encoding, errors=errors)
+    @abstractmethod
+    def touch(self, mode: int = 0o666, exist_ok: bool = True) -> None: ...
 
-    def touch(self, mode=438, exist_ok=True) -> None:
-        self._path.touch(mode=mode, exist_ok=exist_ok)
+    @abstractmethod
+    def unlink(self, missing_ok: bool = False) -> None: ...
 
-    def mkdir(self, mode=511, parents=False, exist_ok=False):
-        self._path.mkdir(mode=mode, parents=parents, exist_ok=exist_ok)
+    @abstractmethod
+    def rename(self, target: "CloudPath | str") -> "CloudPath": ...
 
-    def unlink(self, missing_ok=False) -> None:
-        self._path.unlink(missing_ok=missing_ok)
+    @abstractmethod
+    def replace(self, target: "CloudPath | str") -> "CloudPath": ...
 
-    def rmdir(self) -> None:
-        self._path.rmdir()
+    @abstractmethod
+    def mkdir(self, parents: bool = False, exist_ok: bool = False) -> None: ...
 
-    def rename(self, target: Union[Text, Path]) -> "LocalPath":
-        if not isinstance(target, LocalPath):
-            target = LocalPath(target)
-        target_path = self._path.rename(target._path)
-        return LocalPath(target_path.as_uri())
+    @abstractmethod
+    def rmdir(self) -> None: ...
 
-    def replace(self, target: Union[Text, Path]) -> "LocalPath":
-        if not isinstance(target, LocalPath):
-            target = LocalPath(target)
-        target_path = self._path.replace(target._path)
-        return LocalPath(target_path.as_uri())
+    @abstractmethod
+    def stat(self, follow_symlinks: bool = True) -> Any: ...
 
-    def exists(self) -> bool:
-        return self._path.exists()
+    def relative_to(self, *other: "CloudPath | str") -> "CloudPath":
+        raise CloudOperationError(
+            "relative_to() is not supported: cloud paths are always absolute."
+        )
 
-    def is_dir(self) -> bool:
-        return self._path.is_dir()
+    def is_relative_to(self, *other: "CloudPath | str") -> bool:
+        raise CloudOperationError(
+            "is_relative_to() is not supported: cloud paths are always absolute."
+        )
 
-    def is_file(self) -> bool:
-        return self._path.is_file()
+    def is_symlink(self) -> bool:
+        raise CloudOperationError("Cloud storage does not support symlinks.")
+
+    def is_mount(self) -> bool:
+        raise CloudOperationError("Cloud storage does not support mount points.")
+
+    def is_junction(self) -> bool:
+        raise CloudOperationError("Cloud storage does not support junctions.")
+
+    def is_block_device(self) -> bool:
+        raise CloudOperationError("Cloud storage does not have block devices.")
+
+    def is_char_device(self) -> bool:
+        raise CloudOperationError("Cloud storage does not have char devices.")
+
+    def is_fifo(self) -> bool:
+        raise CloudOperationError("Cloud storage does not support FIFOs.")
+
+    def is_socket(self) -> bool:
+        raise CloudOperationError("Cloud storage does not support sockets.")
+
+    def lstat(self) -> Any:
+        raise CloudOperationError(
+            "lstat() is not supported: cloud storage has no symlinks."
+        )
+
+    def chmod(self, mode: int, follow_symlinks: bool = True) -> None:
+        raise CloudOperationError(
+            "chmod() is not supported: cloud storage has no POSIX permissions."
+        )
+
+    def lchmod(self, mode: int) -> None:
+        raise CloudOperationError(
+            "lchmod() is not supported: cloud storage has no POSIX permissions."
+        )
+
+    def symlink_to(self, target: Any, target_is_directory: bool = False) -> None:
+        raise CloudOperationError("Cloud storage does not support symlinks.")
+
+    def hardlink_to(self, target: Any) -> None:
+        raise CloudOperationError("Cloud storage does not support hard links.")
+
+    def expanduser(self) -> "CloudPath":
+        raise CloudOperationError(
+            "expanduser() is not supported: cloud paths have no home directory."
+        )
+
+    @classmethod
+    def home(cls) -> "CloudPath":
+        raise CloudOperationError(
+            "home() is not supported: cloud paths have no home directory."
+        )
+
+    @classmethod
+    def cwd(cls) -> "CloudPath":
+        raise CloudOperationError(
+            "cwd() is not supported: cloud paths have no working directory."
+        )

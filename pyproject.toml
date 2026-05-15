@@ -1,29 +1,47 @@
-[tool.poetry]
+[project]
 name = "cloudfs"
-version = "0.1.0"
+version = "0.2.0"
 description = "An interface to interact with cloud storage as if it's a local filesystem."
-authors = ["Allen Chou <f1470891079@gmail.com>"]
-license = "Apache License Version 2.0"
+authors = [{ name = "Allen Chou", email = "f1470891079@gmail.com" }]
+license = "Apache-2.0"
 readme = "README.md"
+requires-python = ">=3.11,<4.0"
+dependencies = []
 
-[tool.poetry.dependencies]
-python = ">=3.8.1,<4.0.0"
-google-cloud-storage = {version = "2.*", optional = true}
-yarl = "*"
+[project.optional-dependencies]
+google = ["google-cloud-storage>=3,<4"]
+s3 = ["boto3>=1.35,<2"]
+azure = ["azure-storage-blob>=12,<13"]
+all = [
+    "google-cloud-storage>=3,<4",
+    "boto3>=1.35,<2",
+    "azure-storage-blob>=12,<13",
+]
 
-[tool.poetry.extras]
-all = ["google-cloud-storage"]
-google = ["google-cloud-storage"]
+[dependency-groups]
+dev = [
+    "black",
+    "flake8",
+    "flake8-pyproject",
+    "isort",
+    "mkdocs-material",
+    "poetry-plugin-export",
+    "pytest",
+    "pytest-xdist",
+    "python-dotenv",
+]
 
+[tool.black]
+target-version = ["py311"]
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.4.3"
-flake8 = "^6.1.0"
-black = "^23.10.1"
-isort = "^5.12.0"
-poetry-plugin-export = "1.*"
-python-dotenv = "^1.0.0"
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
