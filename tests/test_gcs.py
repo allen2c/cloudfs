@@ -42,4 +42,4 @@ class TestGCSSpecific:
         from cloudfs import Path
 
         with pytest.raises(ValueError):
-            Path("s3://bucket/key")
+            Path("azure://bucket/key")

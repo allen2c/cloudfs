@@ -24,6 +24,9 @@ dev = [
     "python-dotenv",
 ]
 
+[tool.black]
+target-version = ["py311"]
+
 [tool.flake8]
 max-line-length = 88
 extend-ignore = ["E203"]

@@ -23,6 +23,10 @@ class CloudPath(ABC):
                 from .backend.gcs import GCSPath
 
                 return GCSPath.from_uri(uri)
+            if uri.startswith("s3://"):
+                from .backend.s3 import S3Path
+
+                return S3Path.from_uri(uri)
             raise ValueError(f"Unsupported URI scheme: {uri!r}")
         return object.__new__(cls)
 
