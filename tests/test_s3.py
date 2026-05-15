@@ -1,35 +1,35 @@
 """S3 backend conformance and S3-specific tests."""
 
 import pytest
-from dotenv import load_dotenv
 
-load_dotenv()
+from tests.conformance import CloudPathConformance
+from tests.conftest import S3_BUCKET, TEST_PREFIX
 
-from cloudfs.backend.s3 import S3Path  # noqa: E402
-from tests.conformance import CloudPathConformance  # noqa: E402
-
-BUCKET = "test-cloudfs-062984976919-ap-northeast-3-an"
-PREFIX = "cloudfs-test"
+pytestmark = pytest.mark.skipif(not S3_BUCKET, reason="CLOUDFS_TEST_S3_BUCKET not set")
 
 
 class TestS3Conformance(CloudPathConformance):
-    @pytest.fixture
-    def root(self) -> S3Path:
-        return S3Path(BUCKET, PREFIX)
+    def _make_root(self, prefix: str):
+        from cloudfs.backend.s3 import S3Path
+
+        return S3Path(S3_BUCKET, prefix)
 
 
 class TestS3Specific:
     """Tests for S3-specific behavior not covered by the conformance suite."""
 
     def test_from_uri(self):
-        p = S3Path.from_uri(f"s3://{BUCKET}/{PREFIX}/from_uri.txt")
-        assert p._bucket_name == BUCKET
+        from cloudfs.backend.s3 import S3Path
+
+        p = S3Path.from_uri(f"s3://{S3_BUCKET}/{TEST_PREFIX}/from_uri.txt")
+        assert p._bucket_name == S3_BUCKET
         assert p.name == "from_uri.txt"
 
     def test_path_dispatch(self):
         from cloudfs import Path
+        from cloudfs.backend.s3 import S3Path
 
-        p = Path(f"s3://{BUCKET}/{PREFIX}/dispatch.txt")
+        p = Path(f"s3://{S3_BUCKET}/{TEST_PREFIX}/dispatch.txt")
         assert isinstance(p, S3Path)
         assert isinstance(p, Path)
         assert type(p) is S3Path

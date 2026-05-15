@@ -1,39 +1,37 @@
 """GCS backend conformance and GCS-specific tests."""
 
 import pytest
-from dotenv import load_dotenv
 
-load_dotenv()
+from tests.conformance import CloudPathConformance
+from tests.conftest import GCS_BUCKET, TEST_PREFIX
 
-from cloudfs.backend.gcs import GCSPath  # noqa: E402
-from tests.conformance import CloudPathConformance  # noqa: E402
-
-BUCKET = "test-cloudfs"
-PREFIX = "cloudfs-test"
+pytestmark = pytest.mark.skipif(
+    not GCS_BUCKET, reason="CLOUDFS_TEST_GCS_BUCKET not set"
+)
 
 
 class TestGCSConformance(CloudPathConformance):
-    @pytest.fixture
-    def root(self) -> GCSPath:
-        return GCSPath(BUCKET, PREFIX)
+    def _make_root(self, prefix: str):
+        from cloudfs.backend.gcs import GCSPath
+
+        return GCSPath(GCS_BUCKET, prefix)
 
 
 class TestGCSSpecific:
     """Tests for GCS-specific behavior not covered by the conformance suite."""
 
-    @pytest.fixture
-    def root(self) -> GCSPath:
-        return GCSPath(BUCKET, PREFIX)
-
     def test_from_uri(self):
-        p = GCSPath.from_uri(f"gs://{BUCKET}/{PREFIX}/from_uri.txt")
-        assert p._bucket_name == BUCKET
+        from cloudfs.backend.gcs import GCSPath
+
+        p = GCSPath.from_uri(f"gs://{GCS_BUCKET}/{TEST_PREFIX}/from_uri.txt")
+        assert p._bucket_name == GCS_BUCKET
         assert p.name == "from_uri.txt"
 
     def test_path_dispatch(self):
         from cloudfs import Path
+        from cloudfs.backend.gcs import GCSPath
 
-        p = Path(f"gs://{BUCKET}/{PREFIX}/dispatch.txt")
+        p = Path(f"gs://{GCS_BUCKET}/{TEST_PREFIX}/dispatch.txt")
         assert isinstance(p, GCSPath)
         assert isinstance(p, Path)
         assert type(p) is GCSPath

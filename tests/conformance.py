@@ -1,22 +1,44 @@
 """Backend-agnostic conformance test suite for CloudPath implementations.
 
 Any backend must pass all tests in CloudPathConformance to be considered compliant.
-Subclass this and override the `root` fixture to plug in a backend.
+Subclass this and implement `_make_root(prefix)` to plug in a backend.
+
+Each test gets an isolated prefix: TEST_PREFIX/{worker_id}/{uuid8}.
+Cleanup runs automatically after each test regardless of pass/fail.
 """
+
+import os
+import uuid
+from typing import Iterator
 
 import pytest
 
 from cloudfs import Path
 from cloudfs.base import CloudPath
 from cloudfs.exceptions import CloudOperationError
+from tests.conftest import TEST_PREFIX
 
 
 class CloudPathConformance:
-    """Override `root` in subclass to provide a backend-specific base path."""
+    """Implement `_make_root(prefix)` in subclass to provide a backend-specific path."""
+
+    def _make_root(self, prefix: str) -> CloudPath:
+        raise NotImplementedError("Subclasses must implement `_make_root(prefix)`.")
 
     @pytest.fixture
-    def root(self) -> CloudPath:
-        raise NotImplementedError("Subclasses must provide a `root` fixture.")
+    def root(self) -> Iterator[CloudPath]:
+        worker = os.environ.get("PYTEST_XDIST_WORKER", "w0")
+        prefix = f"{TEST_PREFIX}/{worker}/{uuid.uuid4().hex[:8]}"
+        path = self._make_root(prefix)
+        yield path
+        try:
+            to_delete = [
+                dirpath / f for dirpath, _, filenames in path.walk() for f in filenames
+            ]
+            for p in to_delete:
+                p.unlink(missing_ok=True)
+        except Exception:
+            pass
 
     def test_str_and_repr(self, root: CloudPath):
         assert isinstance(str(root), str)
@@ -84,7 +106,6 @@ class CloudPathConformance:
         p = root / "bytes.bin"
         p.write_bytes(b"\x00\x01\x02")
         assert p.read_bytes() == b"\x00\x01\x02"
-        p.unlink()
 
     def test_open_write_read(self, root: CloudPath):
         p = root / "open_test.txt"
@@ -92,20 +113,17 @@ class CloudPathConformance:
             f.write("hello from open")
         with p.open("r") as f:
             assert f.read() == "hello from open"
-        p.unlink()
 
     def test_touch(self, root: CloudPath):
         p = root / "touch_test.txt"
         p.touch()
         assert p.is_file()
-        p.unlink()
 
     def test_is_dir(self, root: CloudPath):
         p = root / "dirtest" / "file.txt"
         p.write_text("x")
         assert (root / "dirtest").is_dir()
         assert not (root / "dirtest").is_file()
-        p.unlink()
 
     def test_samefile(self, root: CloudPath):
         p = root / "file.txt"
@@ -119,8 +137,6 @@ class CloudPathConformance:
         children = {c.name for c in root.iterdir()}
         for f in files:
             assert f in children
-        for f in files:
-            (root / f).unlink()
 
     def test_glob(self, root: CloudPath):
         (root / "glob_x.txt").write_text("x")
@@ -130,8 +146,6 @@ class CloudPathConformance:
         assert "glob_x.txt" in results
         assert "glob_y.txt" in results
         assert "glob_z.csv" not in results
-        for name in ["glob_x.txt", "glob_y.txt", "glob_z.csv"]:
-            (root / name).unlink()
 
     def test_walk(self, root: CloudPath):
         (root / "walk_dir" / "a.txt").write_text("a")
@@ -140,8 +154,6 @@ class CloudPathConformance:
         all_files = [f for _, _, files in results for f in files]
         assert "a.txt" in all_files
         assert "b.txt" in all_files
-        (root / "walk_dir" / "a.txt").unlink()
-        (root / "walk_dir" / "sub" / "b.txt").unlink()
 
     def test_rename(self, root: CloudPath):
         src = root / "rename_src.txt"
@@ -150,7 +162,6 @@ class CloudPathConformance:
         src.rename(dst)
         assert not src.exists()
         assert dst.read_text() == "rename me"
-        dst.unlink()
 
     def test_stat(self, root: CloudPath):
         p = root / "stat_test.txt"
@@ -158,7 +169,6 @@ class CloudPathConformance:
         s = p.stat()
         assert s.st_size > 0
         assert s.st_mtime > 0
-        p.unlink()
 
     def test_unlink_missing_ok(self, root: CloudPath):
         p = root / "nonexistent.txt"
