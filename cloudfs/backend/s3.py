@@ -20,8 +20,10 @@ rmdir():
     is_dir() returns True.
 
 open():
-    S3 has no native streaming file object. Read modes download the full object
-    into memory. Write modes buffer in memory and upload on close.
+    Read modes stream the object via a chunked reader; write modes stream the
+    upload as an S3 multipart upload, flushing one part at a time. Memory use is
+    bounded by the upload chunk size, not the object size. read_bytes/write_bytes
+    still load the whole object, matching pathlib semantics.
 
 Consistency:
     S3 provides strong read-after-write consistency for all operations since
@@ -38,6 +40,10 @@ import io
 from typing import IO, Any, Generator, Iterator
 
 from cloudfs.base import CloudPath
+
+# Streaming upload part size. Must stay >= 5 MiB, S3's minimum non-final
+# multipart part size. Bounds the memory held during a streaming open("wb").
+_UPLOAD_CHUNK_SIZE = 8 * 1024 * 1024
 
 
 class S3Path(CloudPath):
@@ -321,26 +327,25 @@ class S3Path(CloudPath):
         newline: str | None = None,
     ) -> IO:
         if mode in ("rb", "r"):
-            data = self.read_bytes()
-            buf = io.BytesIO(data)
+            body = self._client.get_object(Bucket=self._bucket_name, Key=self._key)[
+                "Body"
+            ]
+            buf = io.BufferedReader(_S3ReadBuffer(body))
             if mode == "r":
                 return io.TextIOWrapper(
-                    buf,
+                    buf, encoding=encoding or "utf-8", errors=errors, newline=newline
+                )
+            return buf
+        if mode in ("wb", "w"):
+            raw = _S3WriteBuffer(self._client, self._bucket_name, self._key)
+            if mode == "w":
+                return io.TextIOWrapper(
+                    io.BufferedWriter(raw),
                     encoding=encoding or "utf-8",
                     errors=errors,
                     newline=newline,
                 )
-            return buf
-        if mode in ("wb", "w"):
-            return _S3WriteBuffer(
-                self._client,
-                self._bucket_name,
-                self._key,
-                binary=mode == "wb",
-                encoding=encoding or "utf-8",
-                errors=errors,
-                newline=newline,
-            )
+            return raw
         raise ValueError(f"Unsupported mode: {mode!r}")
 
     def read_bytes(self) -> bytes:
@@ -355,9 +360,7 @@ class S3Path(CloudPath):
         return len(data)
 
     def write_text(self, data: str, encoding: str = "utf-8") -> int:
-        encoded = data.encode(encoding)
-        self._client.put_object(Bucket=self._bucket_name, Key=self._key, Body=encoded)
-        return len(encoded)
+        return self.write_bytes(data.encode(encoding))
 
     def touch(self, mode: int = 0o666, exist_ok: bool = True) -> None:
         if self._object_exists():
@@ -428,42 +431,91 @@ class S3Path(CloudPath):
         return cls(bucket, key, _client=_client)
 
 
-class _S3WriteBuffer(io.RawIOBase):
-    def __init__(self, client, bucket, key, binary, encoding, errors, newline):
-        self._client = client
-        self._bucket = bucket
-        self._key = key
-        self._binary = binary
-        self._encoding = encoding
-        self._errors = errors
-        self._newline = newline
-        self._buf = io.BytesIO()
-        self._text_wrapper = None
-        if not binary:
-            self._text_wrapper = io.TextIOWrapper(
-                self._buf, encoding=encoding, errors=errors, newline=newline
-            )
+class _S3ReadBuffer(io.RawIOBase):
+    def __init__(self, body):
+        self._body = body
 
-    def write(self, data) -> int:
-        if self._text_wrapper:
-            return self._text_wrapper.write(data)
-        return self._buf.write(data)
+    def readable(self) -> bool:
+        return True
+
+    def readinto(self, b) -> int:
+        chunk = self._body.read(len(b))
+        if not chunk:
+            return 0
+        n = len(chunk)
+        b[:n] = chunk
+        return n
 
     def close(self) -> None:
         if not self.closed:
-            if self._text_wrapper:
-                self._text_wrapper.flush()
-            self._buf.seek(0)
-            self._client.put_object(
-                Bucket=self._bucket, Key=self._key, Body=self._buf.read()
+            try:
+                self._body.close()
+            finally:
+                super().close()
+
+
+class _S3WriteBuffer(io.RawIOBase):
+    def __init__(self, client, bucket, key):
+        self._client = client
+        self._bucket = bucket
+        self._key = key
+        self._buf = bytearray()
+        self._parts: list[dict] = []
+        self._part_num = 1
+        resp = client.create_multipart_upload(Bucket=bucket, Key=key)
+        self._upload_id = resp["UploadId"]
+
+    def writable(self) -> bool:
+        return True
+
+    def write(self, data) -> int:
+        self._buf.extend(data)
+        while len(self._buf) >= _UPLOAD_CHUNK_SIZE:
+            self._flush_part(_UPLOAD_CHUNK_SIZE)
+        return len(data)
+
+    def _flush_part(self, size: int) -> None:
+        chunk = bytes(self._buf[:size])
+        del self._buf[:size]
+        resp = self._client.upload_part(
+            Bucket=self._bucket,
+            Key=self._key,
+            PartNumber=self._part_num,
+            UploadId=self._upload_id,
+            Body=chunk,
+        )
+        self._parts.append({"PartNumber": self._part_num, "ETag": resp["ETag"]})
+        self._part_num += 1
+
+    def _safe_abort(self) -> None:
+        try:
+            self._client.abort_multipart_upload(
+                Bucket=self._bucket, Key=self._key, UploadId=self._upload_id
             )
-        super().close()
+        except Exception:
+            pass
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args):
-        self.close()
+    def close(self) -> None:
+        if self.closed:
+            return
+        try:
+            if self._buf:
+                self._flush_part(len(self._buf))
+            if self._parts:
+                self._client.complete_multipart_upload(
+                    Bucket=self._bucket,
+                    Key=self._key,
+                    UploadId=self._upload_id,
+                    MultipartUpload={"Parts": self._parts},
+                )
+            else:
+                self._safe_abort()
+                self._client.put_object(Bucket=self._bucket, Key=self._key, Body=b"")
+        except Exception:
+            self._safe_abort()
+            raise
+        finally:
+            super().close()
 
 
 class S3StatResult:

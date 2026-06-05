@@ -1,22 +1,22 @@
 [project]
-name = "cloudfs"
-version = "0.2.0"
-description = "An interface to interact with cloud storage as if it's a local filesystem."
 authors = [{ name = "Allen Chou", email = "f1470891079@gmail.com" }]
+dependencies = []
+description = "An interface to interact with cloud storage as if it's a local filesystem."
 license = "Apache-2.0"
+name = "cloudfs"
 readme = "README.md"
 requires-python = ">=3.11,<4.0"
-dependencies = []
+version = "0.3.0"
 
 [project.optional-dependencies]
+all = [
+    "azure-storage-blob>=12,<13",
+    "boto3>=1.35,<2",
+    "google-cloud-storage>=3,<4",
+]
+azure = ["azure-storage-blob>=12,<13"]
 google = ["google-cloud-storage>=3,<4"]
 s3 = ["boto3>=1.35,<2"]
-azure = ["azure-storage-blob>=12,<13"]
-all = [
-    "google-cloud-storage>=3,<4",
-    "boto3>=1.35,<2",
-    "azure-storage-blob>=12,<13",
-]
 
 [dependency-groups]
 dev = [
@@ -29,19 +29,29 @@ dev = [
     "pytest",
     "pytest-xdist",
     "python-dotenv",
+    "ruff",
 ]
 
 [tool.black]
+line-length = 88
 target-version = ["py311"]
 
 [tool.flake8]
-max-line-length = 88
 extend-ignore = ["E203"]
+max-line-length = 88
 
 [tool.isort]
-profile = "black"
 line_length = 88
+profile = "black"
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+# E203 (whitespace before ':') conflicts with black; mirror the flake8 ignore.
+extend-ignore = ["E203"]
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=2.0.0,<3.0.0"]

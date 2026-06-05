@@ -40,6 +40,6 @@ print(p.read_text())
 
 **`rename()` is not atomic.** It is implemented as copy + delete. A crash between the two steps leaves both source and destination in place.
 
-**`open()` buffers in memory.** Read modes download the full blob; write modes buffer and upload on `close()`.
+**`open()` streams; `read_bytes`/`write_bytes` don't.** `open("rb")` and `open("wb")` stream the blob in fixed-size chunks — writes stage blocks and commit them on `close()`, so memory stays bounded regardless of blob size. Use them for large blobs. `read_bytes`/`write_bytes`/`read_text`/`write_text` load the whole blob into memory, matching `pathlib` semantics. See [Getting Started → Large files](../getting-started.md#large-files-streaming).
 
 **Performance.** Each `exists()`, `is_file()`, and `is_dir()` call makes at least one API request. Prefer `iterdir()` or `walk()` for bulk operations.

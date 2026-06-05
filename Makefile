@@ -1,4 +1,4 @@
-.PHONY: install upgrade format_all
+.PHONY: install upgrade fmt
 
 install:
 	poetry install -E all
@@ -9,13 +9,8 @@ update:
 		--format requirements.txt \
 		--output requirements.txt \
 		--without-hashes
-	poetry export \
-		--format requirements.txt \
-		--output requirements_all.txt \
-		--without-hashes \
-		--with dev \
-		--all-extras
 
-format:
+fmt:
 	isort cloudfs tests
 	black cloudfs tests
+	ruff check cloudfs tests --fix

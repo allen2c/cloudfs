@@ -21,8 +21,10 @@ rmdir():
     is_dir() returns True.
 
 open():
-    Read modes download the full blob into memory. Write modes buffer in memory
-    and upload on close.
+    Read modes stream the blob via a chunked reader; write modes stream the
+    upload by staging blocks and committing them on close. Memory use is bounded
+    by the upload chunk size, not the blob size. read_bytes/write_bytes still
+    load the whole blob, matching pathlib semantics.
 
 rename():
     Implemented as copy + delete. Not atomic — a crash between the two steps
@@ -38,10 +40,15 @@ Performance:
 
 from __future__ import annotations
 
+import base64
 import io
 from typing import IO, Any, Generator, Iterator
 
 from cloudfs.base import CloudPath
+
+# Streaming upload block size. Bounds the memory held during a streaming
+# open("wb"); a chunk is staged as a block and the block list committed on close.
+_UPLOAD_CHUNK_SIZE = 8 * 1024 * 1024
 
 
 class AzurePath(CloudPath):
@@ -323,25 +330,23 @@ class AzurePath(CloudPath):
         newline: str | None = None,
     ) -> IO:
         if mode in ("rb", "r"):
-            data = self.read_bytes()
-            buf = io.BytesIO(data)
+            downloader = self._container.download_blob(self._key)
+            buf = io.BufferedReader(_AzureReadBuffer(downloader))
             if mode == "r":
                 return io.TextIOWrapper(
-                    buf,
+                    buf, encoding=encoding or "utf-8", errors=errors, newline=newline
+                )
+            return buf
+        if mode in ("wb", "w"):
+            raw = _AzureWriteBuffer(self._container, self._key)
+            if mode == "w":
+                return io.TextIOWrapper(
+                    io.BufferedWriter(raw),
                     encoding=encoding or "utf-8",
                     errors=errors,
                     newline=newline,
                 )
-            return buf
-        if mode in ("wb", "w"):
-            return _AzureWriteBuffer(
-                self._container,
-                self._key,
-                binary=mode == "wb",
-                encoding=encoding or "utf-8",
-                errors=errors,
-                newline=newline,
-            )
+            return raw
         raise ValueError(f"Unsupported mode: {mode!r}")
 
     def read_bytes(self) -> bytes:
@@ -355,9 +360,7 @@ class AzurePath(CloudPath):
         return len(data)
 
     def write_text(self, data: str, encoding: str = "utf-8") -> int:
-        encoded = data.encode(encoding)
-        self._container.upload_blob(self._key, encoded, overwrite=True)
-        return len(encoded)
+        return self.write_bytes(data.encode(encoding))
 
     def touch(self, mode: int = 0o666, exist_ok: bool = True) -> None:
         if self._blob_exists():
@@ -426,36 +429,60 @@ class AzurePath(CloudPath):
         return cls(container, key, _client=_client)
 
 
+class _AzureReadBuffer(io.RawIOBase):
+    def __init__(self, downloader):
+        self._chunks = downloader.chunks()
+        self._leftover = b""
+
+    def readable(self) -> bool:
+        return True
+
+    def readinto(self, b) -> int:
+        if not self._leftover:
+            try:
+                self._leftover = next(self._chunks)
+            except StopIteration:
+                return 0
+        n = min(len(b), len(self._leftover))
+        b[:n] = self._leftover[:n]
+        self._leftover = self._leftover[n:]
+        return n
+
+
 class _AzureWriteBuffer(io.RawIOBase):
-    def __init__(self, container, key, binary, encoding, errors, newline):
-        self._container = container
-        self._key = key
-        self._binary = binary
-        self._buf = io.BytesIO()
-        self._text_wrapper = None
-        if not binary:
-            self._text_wrapper = io.TextIOWrapper(
-                self._buf, encoding=encoding, errors=errors, newline=newline
-            )
+    def __init__(self, container, key):
+        self._blob = container.get_blob_client(key)
+        self._buf = bytearray()
+        self._block_ids: list[str] = []
+
+    def writable(self) -> bool:
+        return True
 
     def write(self, data) -> int:
-        if self._text_wrapper:
-            return self._text_wrapper.write(data)
-        return self._buf.write(data)
+        self._buf.extend(data)
+        while len(self._buf) >= _UPLOAD_CHUNK_SIZE:
+            self._flush_block(_UPLOAD_CHUNK_SIZE)
+        return len(data)
+
+    def _flush_block(self, size: int) -> None:
+        chunk = bytes(self._buf[:size])
+        del self._buf[:size]
+        block_id = base64.b64encode(f"{len(self._block_ids):032d}".encode()).decode()
+        self._blob.stage_block(block_id, chunk)
+        self._block_ids.append(block_id)
 
     def close(self) -> None:
-        if not self.closed:
-            if self._text_wrapper:
-                self._text_wrapper.flush()
-            self._buf.seek(0)
-            self._container.upload_blob(self._key, self._buf.read(), overwrite=True)
-        super().close()
+        if self.closed:
+            return
+        from azure.storage.blob import BlobBlock
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args):
-        self.close()
+        try:
+            if self._buf:
+                self._flush_block(len(self._buf))
+            block_list = [BlobBlock(block_id=bid) for bid in self._block_ids]
+            self._blob.commit_block_list(block_list)
+        finally:
+            super().close()
 
 
 class AzureStatResult:
