@@ -137,7 +137,7 @@ class CloudPathConformance:
 
     def test_open_write_empty(self, root: CloudPath):
         p = root / "empty.bin"
-        with p.open("wb") as f:
+        with p.open("wb"):
             pass
         assert p.read_bytes() == b""
         assert p.is_file()
