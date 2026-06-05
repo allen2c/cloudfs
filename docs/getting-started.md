@@ -89,6 +89,25 @@ p.write_bytes(b"\x00\x01\x02")
 data = p.read_bytes()
 ```
 
+### Large files (streaming)
+
+`read_text`, `read_bytes`, `write_text`, and `write_bytes` load the whole object
+into memory, exactly like `pathlib`. For large objects, use `open()` instead — it
+streams in fixed-size chunks, so memory stays bounded no matter how big the object
+is (writes use the backend's native multipart / block upload):
+
+```python
+src = Path("s3://my-bucket/big.bin")
+dst = Path("gs://my-bucket/copy.bin")
+
+# Stream-copy across backends without loading the whole object into memory
+with src.open("rb") as r, dst.open("wb") as w:
+    for chunk in iter(lambda: r.read(8 << 20), b""):  # 8 MiB at a time
+        w.write(chunk)
+```
+
+This works the same across all three backends.
+
 ### Navigate
 
 ```python
