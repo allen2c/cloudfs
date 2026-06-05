@@ -114,6 +114,34 @@ class CloudPathConformance:
         with p.open("r") as f:
             assert f.read() == "hello from open"
 
+    def test_open_streaming_roundtrip(self, root: CloudPath):
+        # 9 MiB exceeds the 8 MiB default upload chunk, forcing the S3/Azure
+        # streaming path to flush at least one full part/block plus a smaller
+        # final one before finalizing.
+        p = root / "stream.bin"
+        piece = b"abcd" * (256 * 1024)  # exactly 1 MiB
+        count = 9
+        with p.open("wb") as f:
+            for _ in range(count):
+                f.write(piece)
+        expected = piece * count
+        read_back = bytearray()
+        with p.open("rb") as f:
+            while True:
+                chunk = f.read(1024 * 1024)
+                if not chunk:
+                    break
+                read_back.extend(chunk)
+        assert len(read_back) == len(expected)
+        assert bytes(read_back) == expected
+
+    def test_open_write_empty(self, root: CloudPath):
+        p = root / "empty.bin"
+        with p.open("wb") as f:
+            pass
+        assert p.read_bytes() == b""
+        assert p.is_file()
+
     def test_touch(self, root: CloudPath):
         p = root / "touch_test.txt"
         p.touch()
