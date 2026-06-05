@@ -690,7 +690,7 @@
 <li>A path can simultaneously satisfy <code>is_file()</code> and <code>is_dir()</code> if an object named <code>foo</code> and another named <code>foo/bar</code> both exist.</li>
 </ul>
 <p><strong><code>rmdir()</code> only removes placeholder objects.</strong> A "virtual" directory that was never explicitly created via <code>mkdir()</code> will raise <code>FileNotFoundError</code> from <code>rmdir()</code> even if <code>is_dir()</code> returns <code>True</code>.</p>
-<p><strong><code>open()</code> buffers in memory.</strong> S3 has no native streaming file object. Read modes download the full object into memory; write modes buffer in memory and upload on <code>close()</code>.</p>
+<p><strong><code>open()</code> streams; <code>read_bytes</code>/<code>write_bytes</code> don't.</strong> <code>open("rb")</code> and <code>open("wb")</code> stream the object in fixed-size chunks — writes use S3 multipart upload, so memory stays bounded regardless of object size and the 5 GB single-<code>PUT</code> limit doesn't apply. Use them for large objects. <code>read_bytes</code>/<code>write_bytes</code>/<code>read_text</code>/<code>write_text</code> load the whole object into memory, matching <code>pathlib</code> semantics. See <a href="../../getting-started/#large-files-streaming">Getting Started → Large files</a>.</p>
 <p><strong>Performance.</strong> Each <code>exists()</code>, <code>is_file()</code>, and <code>is_dir()</code> call makes at least one API request. Prefer <code>iterdir()</code> or <code>walk()</code> for bulk operations.</p>
 
 

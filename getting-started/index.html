@@ -392,6 +392,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#large-files-streaming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Large files (streaming)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#navigate" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -679,6 +690,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#large-files-streaming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Large files (streaming)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#navigate" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -798,44 +820,58 @@
 <a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="n">p</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;</span><span class="se">\x00\x01\x02</span><span class="s2">&quot;</span><span class="p">)</span>
 <a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="n">data</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span>
 </code></pre></div>
+<h3 id="large-files-streaming">Large files (streaming)</h3>
+<p><code>read_text</code>, <code>read_bytes</code>, <code>write_text</code>, and <code>write_bytes</code> load the whole object
+into memory, exactly like <code>pathlib</code>. For large objects, use <code>open()</code> instead — it
+streams in fixed-size chunks, so memory stays bounded no matter how big the object
+is (writes use the backend's native multipart / block upload):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">src</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;s3://my-bucket/big.bin&quot;</span><span class="p">)</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">dst</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://my-bucket/copy.bin&quot;</span><span class="p">)</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Stream-copy across backends without loading the whole object into memory</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="k">with</span> <span class="n">src</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">r</span><span class="p">,</span> <span class="n">dst</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">w</span><span class="p">:</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">8</span> <span class="o">&lt;&lt;</span> <span class="mi">20</span><span class="p">),</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">):</span>  <span class="c1"># 8 MiB at a time</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>        <span class="n">w</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+</code></pre></div>
+<p>This works the same across all three backends.</p>
 <h3 id="navigate">Navigate</h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://my-bucket/data/2024/report.csv&quot;</span><span class="p">)</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>    <span class="c1"># report.csv</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">stem</span><span class="p">)</span>    <span class="c1"># report</span>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">suffix</span><span class="p">)</span>  <span class="c1"># .csv</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>  <span class="c1"># gs://my-bucket/data/2024</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="c1"># Join paths</span>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="n">p2</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;summary.csv&quot;</span>
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="nb">print</span><span class="p">(</span><span class="n">p2</span><span class="p">)</span>        <span class="c1"># gs://my-bucket/data/2024/summary.csv</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://my-bucket/data/2024/report.csv&quot;</span><span class="p">)</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>    <span class="c1"># report.csv</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">stem</span><span class="p">)</span>    <span class="c1"># report</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">suffix</span><span class="p">)</span>  <span class="c1"># .csv</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>  <span class="c1"># gs://my-bucket/data/2024</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="c1"># Join paths</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="n">p2</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;summary.csv&quot;</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="nb">print</span><span class="p">(</span><span class="n">p2</span><span class="p">)</span>        <span class="c1"># gs://my-bucket/data/2024/summary.csv</span>
 </code></pre></div>
 <h3 id="list-glob">List &amp; Glob</h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">base</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://my-bucket/data/&quot;</span><span class="p">)</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="c1"># List direct children</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="c1"># Glob</span>
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="k">for</span> <span class="n">csv</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.csv&quot;</span><span class="p">):</span>
-<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">csv</span><span class="p">)</span>
-<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>
-<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="c1"># Walk recursively</span>
-<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="k">for</span> <span class="n">dirpath</span><span class="p">,</span> <span class="n">dirnames</span><span class="p">,</span> <span class="n">filenames</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">walk</span><span class="p">():</span>
-<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
-<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>        <span class="nb">print</span><span class="p">(</span><span class="n">dirpath</span> <span class="o">/</span> <span class="n">f</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">base</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://my-bucket/data/&quot;</span><span class="p">)</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="c1"># List direct children</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="c1"># Glob</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="k">for</span> <span class="n">csv</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.csv&quot;</span><span class="p">):</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">csv</span><span class="p">)</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="c1"># Walk recursively</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="k">for</span> <span class="n">dirpath</span><span class="p">,</span> <span class="n">dirnames</span><span class="p">,</span> <span class="n">filenames</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">walk</span><span class="p">():</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>        <span class="nb">print</span><span class="p">(</span><span class="n">dirpath</span> <span class="o">/</span> <span class="n">f</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="file-operations">File operations</h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://my-bucket/tmp/file.txt&quot;</span><span class="p">)</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">p</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>                     <span class="c1"># create empty file</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="n">p</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>                    <span class="c1"># True</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="n">p</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>                   <span class="c1"># True</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="n">p</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>                    <span class="c1"># delete</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="n">p</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>     <span class="c1"># delete, no error if missing</span>
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="n">p</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="s2">&quot;new.txt&quot;</span><span class="p">))</span>   <span class="c1"># move</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;gs://my-bucket/tmp/file.txt&quot;</span><span class="p">)</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">p</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>                     <span class="c1"># create empty file</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">p</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>                    <span class="c1"># True</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="n">p</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>                   <span class="c1"># True</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="n">p</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>                    <span class="c1"># delete</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="n">p</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>     <span class="c1"># delete, no error if missing</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="n">p</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="s2">&quot;new.txt&quot;</span><span class="p">))</span>   <span class="c1"># move</span>
 </code></pre></div>
 
 

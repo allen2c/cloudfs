@@ -686,7 +686,7 @@
 </ul>
 <p><strong><code>rmdir()</code> only removes placeholder blobs.</strong> A "virtual" directory that was never explicitly created via <code>mkdir()</code> will raise <code>FileNotFoundError</code> from <code>rmdir()</code> even if <code>is_dir()</code> returns <code>True</code>.</p>
 <p><strong><code>rename()</code> is not atomic.</strong> It is implemented as copy + delete. A crash between the two steps leaves both source and destination in place.</p>
-<p><strong><code>open()</code> buffers in memory.</strong> Read modes download the full blob; write modes buffer and upload on <code>close()</code>.</p>
+<p><strong><code>open()</code> streams; <code>read_bytes</code>/<code>write_bytes</code> don't.</strong> <code>open("rb")</code> and <code>open("wb")</code> stream the blob in fixed-size chunks — writes stage blocks and commit them on <code>close()</code>, so memory stays bounded regardless of blob size. Use them for large blobs. <code>read_bytes</code>/<code>write_bytes</code>/<code>read_text</code>/<code>write_text</code> load the whole blob into memory, matching <code>pathlib</code> semantics. See <a href="../../getting-started/#large-files-streaming">Getting Started → Large files</a>.</p>
 <p><strong>Performance.</strong> Each <code>exists()</code>, <code>is_file()</code>, and <code>is_dir()</code> call makes at least one API request. Prefer <code>iterdir()</code> or <code>walk()</code> for bulk operations.</p>
 
 
